@@ -1,0 +1,5 @@
+{
+  "name": "Smart Notes AI",
+  "description": "An intelligent note-taking app that automatically categorizes your notes using Gemini AI and stores them securely in Firestore.",
+  "requestFramePermissions": []
+}

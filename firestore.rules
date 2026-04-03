@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: notes
+// Document ID: auto-generated
+// Fields:
+//   - text: string (required, 1-5000 chars) - The note content
+//   - category: string (required, 1-50 chars) - AI assigned category
+//   - createdAt: number (required) - Timestamp in ms
+//   - userId: string (required) - Owner's UID
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function isValidNote(data) {
+      return data.keys().hasAll(['text', 'category', 'createdAt', 'userId']) &&
+             data.keys().hasOnly(['text', 'category', 'createdAt', 'userId']) &&
+             data.text is string && data.text.size() > 0 && data.text.size() <= 5000 &&
+             data.category is string && data.category.size() > 0 && data.category.size() <= 50 &&
+             data.createdAt is number &&
+             data.userId == request.auth.uid;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /notes/{noteId} {
+      // Users can only read their own notes
+      allow read: if isDocOwner();
+      
+      // Users can only create notes for themselves with valid data
+      allow create: if isAuthenticated() && isValidNote(request.resource.data);
+      
+      // Users can only delete their own notes
+      allow delete: if isDocOwner();
+      
+      // Notes are immutable in this app version (no update implemented)
+      allow update: if false;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

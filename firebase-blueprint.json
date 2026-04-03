@@ -1,0 +1,35 @@
+{
+  "entities": {
+    "Note": {
+      "title": "Note",
+      "description": "A single note entry with its text, timestamp, and AI-assigned category.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The content of the note."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category assigned by AI."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the note was created."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns the note."
+        }
+      },
+      "required": ["text", "category", "createdAt", "userId"]
+    }
+  },
+  "firestore": {
+    "/notes/{noteId}": {
+      "schema": "Note",
+      "description": "Collection of all user notes."
+    }
+  }
+}
